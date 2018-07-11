@@ -10,7 +10,7 @@
 #![feature(iterator_find_map)]
 #![feature(crate_visibility_modifier)]
 
-mod query_builder;
+mod request_information;
 
 mod path;
 pub use path::Path;
