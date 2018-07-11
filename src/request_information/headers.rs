@@ -1,4 +1,3 @@
-use extern::reqwest;
 use std::fmt;
 
 #[derive(Debug, Clone)]

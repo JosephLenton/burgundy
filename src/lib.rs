@@ -15,6 +15,9 @@ extern crate failure;
 
 mod request_information;
 
+mod burgandy_to_hyper;
+mod method;
+
 mod path;
 pub use path::Path;
 

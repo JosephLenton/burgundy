@@ -1,6 +1,6 @@
-use extern::failure::Error;
-use extern::reqwest;
+use error;
 use extern::serde;
+use method;
 use request_information;
 use std::cell;
 use std::fmt;
@@ -10,14 +10,14 @@ use std::rc;
 /// From that you can generate `Path` objects.
 #[derive(Debug, Clone)]
 pub struct Path {
-    method: reqwest::Method,
+    method: method::Method,
     domain_info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,
     info: request_information::RequestInformation,
 }
 
 impl Path {
     crate fn new(
-        method: reqwest::Method,
+        method: method::Method,
         domain_info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,
     ) -> Self {
         let info = request_information::RequestInformation::new(String::new());
@@ -45,17 +45,17 @@ impl Path {
         self.info.add_header(key, value);
     }
 
-    pub fn execute<T: serde::de::DeserializeOwned>(self) -> Result<T, Error> {
-        Ok(self.request()?.json::<T>()?)
+    pub fn execute<T: serde::de::DeserializeOwned>(self) -> Result<T, error::Error> {
+        let body = self.execute_raw()?;
+        // do deserialisation
+        // return result
+        Ok(body)
     }
 
-    pub fn execute_raw(self) -> Result<String, Error> {
-        Ok(self.request()?.text()?)
-    }
-
-    fn request(self) -> Result<reqwest::Response, Error> {
+    pub fn execute_raw(self) -> Result<String, error::Error> {
         let url = self.to_string();
-        let client = reqwest::Client::new();
+
+        let client = hyper::client::Client::new();
 
         let mut request_builder = client.request(self.method, &url);
 

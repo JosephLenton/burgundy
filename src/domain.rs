@@ -1,5 +1,5 @@
 use error;
-use extern::reqwest;
+use method;
 use path::Path;
 use request_information;
 use std::cell;
@@ -14,11 +14,11 @@ pub struct Domain {
 impl Domain {
     pub fn new(domain: &str) -> Self {
         let domain = domain.to_string();
-        let info = request_information::RequestInformation::new(domain);
+        let info = rc::Rc::new(cell::RefCell::new(
+            request_information::RequestInformation::new(domain),
+        ));
 
-        Domain {
-            info: rc::Rc::new(cell::RefCell::new(info)),
-        }
+        Domain { info }
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
@@ -27,36 +27,36 @@ impl Domain {
         key: &str,
         value: &impl fmt::Display,
     ) -> Result<(), error::Error> {
-        self.info.borrow_mut().add_query_param(key, value)?;
+        self.info.borrow().add_query_param(key, value)?;
 
         Ok(())
     }
 
     pub fn header(&mut self, key: &'static str, value: &impl fmt::Display) {
-        self.info.borrow_mut().add_header(key, value);
+        self.info.borrow().add_header(key, value);
     }
 
     pub fn get(&self) -> Path {
-        self.new_path(reqwest::Method::Get)
+        self.new_path(method::Method::Get)
     }
 
     pub fn post(&self) -> Path {
-        self.new_path(reqwest::Method::Post)
+        self.new_path(method::Method::Post)
     }
 
     pub fn put(&self) -> Path {
-        self.new_path(reqwest::Method::Put)
+        self.new_path(method::Method::Put)
     }
 
     pub fn delete(&self) -> Path {
-        self.new_path(reqwest::Method::Delete)
+        self.new_path(method::Method::Delete)
     }
 
     pub fn patch(&self) -> Path {
-        self.new_path(reqwest::Method::Patch)
+        self.new_path(method::Method::Patch)
     }
 
-    fn new_path(&self, method: reqwest::Method) -> Path {
+    fn new_path(&self, method: method::Method) -> Path {
         Path::new(method, rc::Rc::clone(&self.info))
     }
 }
