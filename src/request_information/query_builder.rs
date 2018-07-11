@@ -24,7 +24,7 @@ impl QueryBuilder {
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
-    crate fn push_query(&mut self, key: &str, value: &impl fmt::Display) {
+    crate fn add(&mut self, key: &str, value: &impl fmt::Display) {
         if let None = self.contents {
             let query = String::with_capacity(QUERY_STRING_START_SIZE);
             self.contents = Some(query);
@@ -64,7 +64,7 @@ mod test {
     #[test]
     fn one_query_key_value() {
         let mut query = QueryBuilder::new();
-        query.push_query(&"key", &"value");
+        query.add(&"key", &"value");
 
         assert_eq!(query.to_string(), "key=value");
     }
@@ -72,9 +72,9 @@ mod test {
     #[test]
     fn multiple_query_key_value() {
         let mut query = QueryBuilder::new();
-        query.push_query(&"key", &"value");
-        query.push_query(&"donkeyfy", &true);
-        query.push_query(&"num_cats", &123);
+        query.add(&"key", &"value");
+        query.add(&"donkeyfy", &true);
+        query.add(&"num_cats", &123);
 
         assert_eq!(query.to_string(), "key=value&donkeyfy=true&num_cats=123");
     }

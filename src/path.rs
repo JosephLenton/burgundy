@@ -35,10 +35,14 @@ impl Path {
         self
     }
 
-    pub fn push_query(mut self, key: &str, value: &impl fmt::Display) -> Self {
-        self.info.push_query(key, value);
+    pub fn query_param(mut self, key: &str, value: &impl fmt::Display) -> Self {
+        self.info.add_query_param(key, value);
 
         self
+    }
+
+    pub fn header(&mut self, key: &str, value: &impl fmt::Display) {
+        self.info.add_header(key, value);
     }
 
     pub fn execute<T: serde::de::DeserializeOwned>(self) -> Result<T, Error> {
@@ -99,8 +103,8 @@ mod test {
         let path = domain
             .get()
             .push(&"list")
-            .push_query(&"size", &50)
-            .push_query(&"index", &2);
+            .query_param(&"size", &50)
+            .query_param(&"index", &2);
 
         assert_eq!(
             path.to_string(),

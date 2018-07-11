@@ -12,7 +12,7 @@ pub struct Domain {
 
 impl Domain {
     pub fn new(domain: &str) -> Self {
-        let domain = domain.trim_right_matches(&"/").to_string();
+        let domain = domain.to_string();
         let info = request_information::RequestInformation::new(domain);
 
         Domain {
@@ -21,8 +21,12 @@ impl Domain {
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
-    pub fn push_query<D: fmt::Display>(&mut self, key: &str, value: &D) {
-        self.info.borrow_mut().push_query(key, value);
+    pub fn query_param(&mut self, key: &str, value: &impl fmt::Display) {
+        self.info.borrow_mut().add_query_param(key, value);
+    }
+
+    pub fn header(&mut self, key: &str, value: &impl fmt::Display) {
+        self.info.borrow_mut().add_header(key, value);
     }
 
     pub fn get(&self) -> Path {
@@ -44,8 +48,6 @@ impl Domain {
     pub fn patch(&self) -> Path {
         self.new_path(reqwest::Method::Patch)
     }
-
-    pub fn header(&mut self, key: &str, value: &str) {}
 
     fn new_path(&self, method: reqwest::Method) -> Path {
         Path::new(method, rc::Rc::clone(&self.info))
@@ -71,7 +73,7 @@ mod test {
     #[test]
     fn domain_with_base_query() {
         let mut domain = Domain::new("https://api.example.com/");
-        domain.push_query(&"type", &"donkeys");
+        domain.query_param(&"type", &"donkeys");
 
         let path = domain.get().push(&"list");
         assert_eq!(
@@ -83,9 +85,9 @@ mod test {
     #[test]
     fn domain_with_base_query_and_path() {
         let mut domain = Domain::new("https://api.example.com/");
-        domain.push_query(&"type", &"donkeys");
+        domain.query_param(&"type", &"donkeys");
 
-        let path = domain.get().push(&"list").push_query(&"length", &"long");
+        let path = domain.get().push(&"list").query_param(&"length", &"long");
         assert_eq!(
             path.to_string(),
             "https://api.example.com/list?type=donkeys&length=long"

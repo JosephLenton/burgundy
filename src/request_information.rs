@@ -30,8 +30,12 @@ impl RequestInformation {
         write!(self.url, "/{}", part);
     }
 
-    crate fn push_query(&mut self, key: &str, value: &impl fmt::Display) {
-        self.query.push_query(key, value);
+    crate fn add_query_param(&mut self, key: &str, value: &impl fmt::Display) {
+        self.query.add(key, value);
+    }
+
+    crate fn add_header(&mut self, key: &str, value: &impl fmt::Display) {
+        self.headers.add(key, value);
     }
 }
 
@@ -40,7 +44,7 @@ crate fn write_full_url(
     domain: &RequestInformation,
     parts: &RequestInformation,
 ) -> fmt::Result {
-    write!(f, "{}{}", domain.url, parts.url)?;
+    write!(f, "{}{}", domain.url.trim_right_matches(&"/"), parts.url)?;
 
     if !domain.query.is_empty() {
         write!(f, "?{}", domain.query)?;
