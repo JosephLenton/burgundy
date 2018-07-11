@@ -1,3 +1,4 @@
+use error;
 use std::fmt;
 use std::fmt::Write;
 
@@ -24,7 +25,7 @@ impl QueryBuilder {
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
-    crate fn add(&mut self, key: &str, value: &impl fmt::Display) {
+    crate fn add(&mut self, key: &str, value: &impl fmt::Display) -> Result<(), error::Error> {
         if let None = self.contents {
             let query = String::with_capacity(QUERY_STRING_START_SIZE);
             self.contents = Some(query);
@@ -33,10 +34,12 @@ impl QueryBuilder {
         let query_str = self.contents.as_mut().unwrap();
 
         if query_str.len() > 0 {
-            write!(query_str, "&");
+            write!(query_str, "&")?;
         }
 
-        write!(query_str, "{}={}", &key, &value);
+        write!(query_str, "{}={}", &key, &value)?;
+
+        Ok(())
     }
 }
 

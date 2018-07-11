@@ -41,7 +41,7 @@ impl Path {
         self
     }
 
-    pub fn header(&mut self, key: &str, value: &impl fmt::Display) {
+    pub fn header(&mut self, key: &'static str, value: &impl fmt::Display) {
         self.info.add_header(key, value);
     }
 
@@ -58,6 +58,13 @@ impl Path {
         let client = reqwest::Client::new();
 
         let mut request_builder = client.request(self.method, &url);
+
+        let mut headers = reqwest::header::Headers::new();
+
+        self.domain_info.borrow().copy_headers(&mut headers);
+        self.info.copy_headers(&mut headers);
+
+        request_builder.headers(headers);
         let response = request_builder.send()?;
 
         Ok(response)

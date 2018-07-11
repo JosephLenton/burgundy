@@ -1,3 +1,4 @@
+use error;
 use extern::reqwest;
 use path::Path;
 use request_information;
@@ -21,11 +22,17 @@ impl Domain {
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
-    pub fn query_param(&mut self, key: &str, value: &impl fmt::Display) {
-        self.info.borrow_mut().add_query_param(key, value);
+    pub fn query_param(
+        &mut self,
+        key: &str,
+        value: &impl fmt::Display,
+    ) -> Result<(), error::Error> {
+        self.info.borrow_mut().add_query_param(key, value)?;
+
+        Ok(())
     }
 
-    pub fn header(&mut self, key: &str, value: &impl fmt::Display) {
+    pub fn header(&mut self, key: &'static str, value: &impl fmt::Display) {
         self.info.borrow_mut().add_header(key, value);
     }
 

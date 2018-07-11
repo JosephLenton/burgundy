@@ -1,3 +1,5 @@
+use error;
+use extern::reqwest;
 use std::fmt;
 use std::fmt::Write;
 
@@ -26,16 +28,28 @@ impl RequestInformation {
         }
     }
 
-    crate fn push_path_part(&mut self, part: &impl fmt::Display) {
-        write!(self.url, "/{}", part);
+    crate fn push_path_part(&mut self, part: &impl fmt::Display) -> Result<(), error::Error> {
+        write!(self.url, "/{}", part)?;
+
+        Ok(())
     }
 
-    crate fn add_query_param(&mut self, key: &str, value: &impl fmt::Display) {
-        self.query.add(key, value);
+    crate fn add_query_param(
+        &mut self,
+        key: &str,
+        value: &impl fmt::Display,
+    ) -> Result<(), error::Error> {
+        self.query.add(key, value)?;
+
+        Ok(())
     }
 
-    crate fn add_header(&mut self, key: &str, value: &impl fmt::Display) {
+    crate fn add_header(&mut self, key: &'static str, value: &impl fmt::Display) {
         self.headers.add(key, value);
+    }
+
+    crate fn copy_headers(&self, headers: &mut reqwest::header::Headers) {
+        self.headers.copy_headers(headers);
     }
 }
 

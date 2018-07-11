@@ -10,6 +10,9 @@
 #![feature(iterator_find_map)]
 #![feature(crate_visibility_modifier)]
 
+#[macro_use]
+extern crate failure;
+
 mod request_information;
 
 mod path;
@@ -17,3 +20,6 @@ pub use path::Path;
 
 mod domain;
 pub use domain::Domain;
+
+mod error;
+pub use error::Error;
