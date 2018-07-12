@@ -1,6 +1,11 @@
 #![allow(missing_docs)]
 #![warn(unreachable_pub)]
-#![deny(trivial_casts, trivial_numeric_casts, unused_extern_crates, unused_import_braces)]
+#![deny(
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces
+)]
 #![feature(nll)]
 #![feature(try_trait)]
 #![feature(box_patterns)]

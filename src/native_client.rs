@@ -54,11 +54,14 @@ impl NativeClient {
 fn response_to_string(response: hyper::Response<hyper::body::Body>) -> String {
     let mut body = String::new();
 
-    response.into_body().for_each(|chunk| {
+    let b = response.into_body();
+    b.for_each(|chunk| {
         // I don't like that we go chunk to String to write.
         // However I don't know how to get rid of it.
         let chunk_str = String::from_utf8_lossy(&chunk);
         body.push_str(&chunk_str);
+
+        Ok(())
     });
 
     body
