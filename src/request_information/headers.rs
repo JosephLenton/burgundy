@@ -1,4 +1,5 @@
 use std::fmt;
+use std::slice;
 
 #[derive(Debug, Clone)]
 crate struct Headers {
@@ -10,6 +11,7 @@ impl Headers {
         Self { headers: None }
     }
 
+    /// Stores the header.
     crate fn add(&mut self, key: &'static str, value: &impl fmt::Display) {
         if let None = self.headers {
             self.headers = Some(Vec::new());
@@ -21,11 +23,11 @@ impl Headers {
             .push((key, value.to_string()));
     }
 
-    crate fn copy_headers(&self, dest_headers: &mut reqwest::header::Headers) {
-        if let Some(ref headers) = self.headers {
-            headers.iter().for_each(|(k, v)| {
-                dest_headers.set_raw(*k, v.as_str());
-            });
+    /// An iterator over all header key => value pairs.
+    crate fn iter(&self) -> slice::Iter<(&'static str, String)> {
+        match self.headers {
+            Some(headers) => headers.iter(),
+            None => Vec::new().iter(),
         }
     }
 }

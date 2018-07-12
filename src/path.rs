@@ -1,7 +1,10 @@
 use error;
 use extern::serde;
+use extern::serde_json;
 use method;
+use native_client;
 use request_information;
+use response;
 use std::cell;
 use std::fmt;
 use std::rc;
@@ -11,6 +14,7 @@ use std::rc;
 #[derive(Debug, Clone)]
 pub struct Path {
     method: method::Method,
+    client: rc::Rc<cell::RefCell<native_client::NativeClient>>,
     domain_info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,
     info: request_information::RequestInformation,
 }
@@ -18,12 +22,14 @@ pub struct Path {
 impl Path {
     crate fn new(
         method: method::Method,
+        client: rc::Rc<cell::RefCell<native_client::NativeClient>>,
         domain_info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,
     ) -> Self {
         let info = request_information::RequestInformation::new(String::new());
 
         Self {
             method,
+            client,
             domain_info,
             info,
         }
@@ -45,29 +51,20 @@ impl Path {
         self.info.add_header(key, value);
     }
 
-    pub fn execute<T: serde::de::DeserializeOwned>(self) -> Result<T, error::Error> {
-        let body = self.execute_raw()?;
-        // do deserialisation
-        // return result
-        Ok(body)
+    /// Executes the path, and deserializes what comes back.
+    pub fn send<T: serde::de::DeserializeOwned>(self) -> Result<T, error::Error> {
+        deserialize::<T>(self.send_raw()?)
     }
 
-    pub fn execute_raw(self) -> Result<String, error::Error> {
-        let url = self.to_string();
+    /// Sends the request, returns the response as just a String.
+    pub fn send_raw(self) -> Result<String, error::Error> {
+        string_or_error(self.execute(None))
+    }
 
-        let client = hyper::client::Client::new();
-
-        let mut request_builder = client.request(self.method, &url);
-
-        let mut headers = reqwest::header::Headers::new();
-
-        self.domain_info.borrow().copy_headers(&mut headers);
-        self.info.copy_headers(&mut headers);
-
-        request_builder.headers(headers);
-        let response = request_builder.send()?;
-
-        Ok(response)
+    fn execute(self, body: Option<String>) -> Result<response::Response, error::Error> {
+        self.client
+            .borrow_mut()
+            .request(self.method, &self.domain_info.borrow(), &self.info, body)
     }
 }
 
@@ -75,6 +72,23 @@ impl<'a> fmt::Display for Path {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         request_information::write_full_url(f, &self.domain_info.borrow(), &self.info)
     }
+}
+
+fn string_or_error(
+    response: Result<response::Response, error::Error>,
+) -> Result<String, error::Error> {
+    response.and_then(|r| {
+        if r.status == 200 {
+            Ok(r.body)
+        } else {
+            Err(error::Error::new_request_not_ok(r))
+        }
+    })
+}
+
+fn deserialize<T: serde::de::DeserializeOwned>(body: String) -> Result<T, error::Error> {
+    Ok(serde_json::from_str::<T>(&body)
+        .map_err(|err| error::Error::new_deserialization_error(err, body))?)
 }
 
 #[cfg(test)]

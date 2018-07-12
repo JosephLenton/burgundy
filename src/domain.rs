@@ -1,5 +1,6 @@
 use error;
 use method;
+use native_client;
 use path::Path;
 use request_information;
 use std::cell;
@@ -8,17 +9,19 @@ use std::rc;
 
 #[derive(Debug, Clone)]
 pub struct Domain {
+    client: rc::Rc<cell::RefCell<native_client::NativeClient>>,
     info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,
 }
 
 impl Domain {
     pub fn new(domain: &str) -> Self {
         let domain = domain.to_string();
+        let client = rc::Rc::new(cell::RefCell::new(native_client::NativeClient::new()));
         let info = rc::Rc::new(cell::RefCell::new(
             request_information::RequestInformation::new(domain),
         ));
 
-        Domain { info }
+        Domain { client, info }
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
@@ -27,13 +30,13 @@ impl Domain {
         key: &str,
         value: &impl fmt::Display,
     ) -> Result<(), error::Error> {
-        self.info.borrow().add_query_param(key, value)?;
+        self.info.borrow_mut().add_query_param(key, value)?;
 
         Ok(())
     }
 
     pub fn header(&mut self, key: &'static str, value: &impl fmt::Display) {
-        self.info.borrow().add_header(key, value);
+        self.info.borrow_mut().add_header(key, value);
     }
 
     pub fn get(&self) -> Path {
@@ -57,7 +60,11 @@ impl Domain {
     }
 
     fn new_path(&self, method: method::Method) -> Path {
-        Path::new(method, rc::Rc::clone(&self.info))
+        Path::new(
+            method,
+            rc::Rc::clone(&self.client),
+            rc::Rc::clone(&self.info),
+        )
     }
 }
 

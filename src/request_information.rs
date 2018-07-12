@@ -53,7 +53,7 @@ crate fn to_full_url(
     parts: &RequestInformation,
 ) -> Result<String, fmt::Error> {
     let mut text = String::new();
-    write!(&text, "{}", UrlFormatter { domain, parts })?;
+    write!(&mut text, "{}", UrlFormatter { domain, parts })?;
     Ok(text)
 }
 

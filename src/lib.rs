@@ -13,9 +13,9 @@
 #[macro_use]
 extern crate failure;
 
+mod native_client;
 mod request_information;
 
-mod burgandy_to_hyper;
 mod method;
 
 mod path;
@@ -26,3 +26,6 @@ pub use domain::Domain;
 
 mod error;
 pub use error::Error;
+
+mod response;
+pub use response::Response;

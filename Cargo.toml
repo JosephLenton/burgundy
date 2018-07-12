@@ -7,6 +7,8 @@ repository = "https://github.com/JosephLenton/burgundy"
 license = "MIT"
 
 [dependencies]
+futures = { version = "0.1.22", default-features = false }
+http = "0.1.7"
 hyper = "0.12.5"
 failure = "0.1.1"
 serde = "1.0.70"
