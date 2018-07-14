@@ -1,3 +1,8 @@
+//!
+//! This is an incomplete example of bilding a Github bindings using
+//! Burgundy.
+//!
+
 #![feature(extern_in_paths)]
 use extern::burgundy;
 
@@ -7,9 +12,13 @@ pub struct Github {
 
 impl Github {
     pub fn new() -> Self {
-        Self {
-            domain: burgundy::Domain::new("https://api.github.com"),
-        }
+        let mut domain = burgundy::Domain::new("https://api.github.com");
+        domain.header(
+            &"User-Agent",
+            &format!("github burgundy example / {}", env!("CARGO_PKG_VERSION")),
+        );
+
+        Self { domain }
     }
 
     pub fn get(&self) -> GithubGet {
@@ -23,23 +32,42 @@ pub struct GithubGet {
     url: burgundy::Path,
 }
 
-pub struct GithubGetRepo {
-    url: burgundy::Path,
-}
-
 impl GithubGet {
-    pub fn repo(self, org: &str) -> GithubGetRepo {
-        GithubGetRepo {
-            url: self.url.push(&"repo").push(&org),
+    pub fn orgs(self, org: &str) -> GithubGetOrgs {
+        GithubGetOrgs {
+            url: self.url.push(&"orgs").push(&org),
         }
     }
 }
 
-fn main() -> () {
+pub struct GithubGetOrgs {
+    url: burgundy::Path,
+}
+
+impl GithubGetOrgs {
+    pub fn repos(self) -> GithubGetOrgsRepos {
+        GithubGetOrgsRepos {
+            url: self.url.push(&"repos"),
+        }
+    }
+}
+
+pub struct GithubGetOrgsRepos {
+    url: burgundy::Path,
+}
+
+impl GithubGetOrgsRepos {
+    pub fn run(self) -> Result<String, burgundy::Error> {
+        self.url.send_raw()
+    }
+}
+
+fn main() -> Result<(), burgundy::Error> {
     let github = Github::new();
-    let url = github.get().repo("Microsoft");
+    let path = github.get().orgs("Microsoft").repos();
 
-    println!("{}", url.url);
+    let repos = path.run()?;
+    println!("{}", repos);
 
-    ()
+    Ok(())
 }

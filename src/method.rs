@@ -1,5 +1,6 @@
 /// Which type of request it being made.
 #[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
 crate enum Method {
     Get,
     Post,
@@ -9,4 +10,5 @@ crate enum Method {
     Options,
     Connect,
     Patch,
+    Trace,
 }

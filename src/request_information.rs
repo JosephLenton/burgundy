@@ -46,6 +46,10 @@ impl RequestInformation {
     crate fn add_header(&mut self, key: &'static str, value: &impl fmt::Display) {
         self.headers.add(key, value);
     }
+
+    crate fn for_each_header(&self, f: impl FnMut((&str, &str))) {
+        self.headers.for_each(f)
+    }
 }
 
 crate fn to_full_url(

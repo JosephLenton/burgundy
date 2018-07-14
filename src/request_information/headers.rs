@@ -1,5 +1,4 @@
 use std::fmt;
-use std::slice;
 
 #[derive(Debug, Clone)]
 crate struct Headers {
@@ -24,12 +23,11 @@ impl Headers {
     }
 
     /// An iterator over all header key => value pairs.
-    crate fn for_each<F, T>(&self, f: F)
-    where
-        F: FnMut(()),
-    {
-        if Some(headers) = self.headers {
-            headers.iter().for_each(f)
+    crate fn for_each(&self, mut f: impl FnMut((&str, &str))) {
+        if let Some(ref headers) = self.headers {
+            headers
+                .iter()
+                .for_each(|(ref key, ref value)| f((key, value)))
         }
     }
 }
