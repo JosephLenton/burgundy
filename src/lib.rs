@@ -31,6 +31,7 @@ pub use domain::Domain;
 
 mod error;
 pub use error::Error;
+pub use error::Result;
 
 mod response;
 pub use response::Response;

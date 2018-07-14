@@ -4,6 +4,9 @@ use extern::serde_json;
 use response;
 use std::error;
 use std::fmt;
+use std::result;
+
+pub type Result<T> = result::Result<T, error::Error>;
 
 /// Represents the errors possible to fall out from Burgundy.
 #[derive(Fail, Debug)]
