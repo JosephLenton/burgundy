@@ -58,7 +58,7 @@ pub struct GithubGetOrgsRepos {
 
 impl GithubGetOrgsRepos {
     pub fn run(self) -> Result<String, burgundy::Error> {
-        self.url.send_raw()
+        self.url.execute_as_string()
     }
 }
 

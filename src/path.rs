@@ -52,12 +52,12 @@ impl Path {
     }
 
     /// Executes the path, and deserializes what comes back.
-    pub fn send<T: serde::de::DeserializeOwned>(self) -> Result<T, error::Error> {
-        deserialize::<T>(self.send_raw()?)
+    pub fn execute_as_json<T: serde::de::DeserializeOwned>(self) -> Result<T, error::Error> {
+        deserialize::<T>(self.execute_as_string()?)
     }
 
     /// Sends the request, returns the response as just a String.
-    pub fn send_raw(self) -> Result<String, error::Error> {
+    pub fn execute_as_string(self) -> Result<String, error::Error> {
         string_or_error(self.execute(None))
     }
 
