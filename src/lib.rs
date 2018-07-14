@@ -1,6 +1,11 @@
 #![allow(missing_docs)]
 #![warn(unreachable_pub)]
-#![deny(trivial_casts, trivial_numeric_casts, unused_extern_crates, unused_import_braces)]
+#![deny(
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces
+)]
 #![feature(nll)]
 #![feature(try_trait)]
 #![feature(box_patterns)]
@@ -13,7 +18,10 @@
 #[macro_use]
 extern crate failure;
 
+mod native_client;
 mod request_information;
+
+mod method;
 
 mod path;
 pub use path::Path;
@@ -23,3 +31,7 @@ pub use domain::Domain;
 
 mod error;
 pub use error::Error;
+pub use error::Result;
+
+mod response;
+pub use response::Response;

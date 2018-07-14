@@ -1,5 +1,6 @@
 use error;
-use extern::reqwest;
+use method;
+use native_client;
 use path::Path;
 use request_information;
 use std::cell;
@@ -8,17 +9,19 @@ use std::rc;
 
 #[derive(Debug, Clone)]
 pub struct Domain {
+    client: rc::Rc<cell::RefCell<native_client::NativeClient>>,
     info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,
 }
 
 impl Domain {
     pub fn new(domain: &str) -> Self {
         let domain = domain.to_string();
-        let info = request_information::RequestInformation::new(domain);
+        let client = rc::Rc::new(cell::RefCell::new(native_client::NativeClient::new()));
+        let info = rc::Rc::new(cell::RefCell::new(
+            request_information::RequestInformation::new(domain),
+        ));
 
-        Domain {
-            info: rc::Rc::new(cell::RefCell::new(info)),
-        }
+        Domain { client, info }
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
@@ -37,27 +40,31 @@ impl Domain {
     }
 
     pub fn get(&self) -> Path {
-        self.new_path(reqwest::Method::Get)
+        self.new_path(method::Method::Get)
     }
 
     pub fn post(&self) -> Path {
-        self.new_path(reqwest::Method::Post)
+        self.new_path(method::Method::Post)
     }
 
     pub fn put(&self) -> Path {
-        self.new_path(reqwest::Method::Put)
+        self.new_path(method::Method::Put)
     }
 
     pub fn delete(&self) -> Path {
-        self.new_path(reqwest::Method::Delete)
+        self.new_path(method::Method::Delete)
     }
 
     pub fn patch(&self) -> Path {
-        self.new_path(reqwest::Method::Patch)
+        self.new_path(method::Method::Patch)
     }
 
-    fn new_path(&self, method: reqwest::Method) -> Path {
-        Path::new(method, rc::Rc::clone(&self.info))
+    fn new_path(&self, method: method::Method) -> Path {
+        Path::new(
+            method,
+            rc::Rc::clone(&self.client),
+            rc::Rc::clone(&self.info),
+        )
     }
 }
 

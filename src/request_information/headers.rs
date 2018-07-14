@@ -1,9 +1,8 @@
-use extern::reqwest;
 use std::fmt;
 
 #[derive(Debug, Clone)]
 crate struct Headers {
-    headers: Option<Vec<(&'static str, String)>>,
+    headers: Option<Vec<(String, String)>>,
 }
 
 impl Headers {
@@ -11,7 +10,8 @@ impl Headers {
         Self { headers: None }
     }
 
-    crate fn add(&mut self, key: &'static str, value: &impl fmt::Display) {
+    /// Stores the header.
+    crate fn add(&mut self, key: &str, value: &impl fmt::Display) {
         if let None = self.headers {
             self.headers = Some(Vec::new());
         }
@@ -19,14 +19,15 @@ impl Headers {
         self.headers
             .as_mut()
             .unwrap()
-            .push((key, value.to_string()));
+            .push((key.to_string(), value.to_string()));
     }
 
-    crate fn copy_headers(&self, dest_headers: &mut reqwest::header::Headers) {
+    /// An iterator over all header key => value pairs.
+    crate fn for_each(&self, mut f: impl FnMut((&str, &str))) {
         if let Some(ref headers) = self.headers {
-            headers.iter().for_each(|(k, v)| {
-                dest_headers.set_raw(*k, v.as_str());
-            });
+            headers
+                .iter()
+                .for_each(|(ref key, ref value)| f((key, value)))
         }
     }
 }

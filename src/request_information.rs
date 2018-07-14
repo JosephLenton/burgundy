@@ -1,5 +1,4 @@
 use error;
-use extern::reqwest;
 use std::fmt;
 use std::fmt::Write;
 
@@ -48,9 +47,18 @@ impl RequestInformation {
         self.headers.add(key, value);
     }
 
-    crate fn copy_headers(&self, headers: &mut reqwest::header::Headers) {
-        self.headers.copy_headers(headers);
+    crate fn for_each_header(&self, f: impl FnMut((&str, &str))) {
+        self.headers.for_each(f)
     }
+}
+
+crate fn to_full_url(
+    domain: &RequestInformation,
+    parts: &RequestInformation,
+) -> Result<String, fmt::Error> {
+    let mut text = String::new();
+    write!(&mut text, "{}", UrlFormatter { domain, parts })?;
+    Ok(text)
 }
 
 crate fn write_full_url(
@@ -71,4 +79,45 @@ crate fn write_full_url(
     }
 
     Ok(())
+}
+
+struct UrlFormatter<'a> {
+    domain: &'a RequestInformation,
+    parts: &'a RequestInformation,
+}
+
+impl<'a> fmt::Display for UrlFormatter<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}{}",
+            self.domain.url.trim_right_matches(&"/"),
+            self.parts.url
+        )?;
+
+        if !self.domain.query.is_empty() {
+            write!(f, "?{}", self.domain.query)?;
+
+            if !self.parts.query.is_empty() {
+                write!(f, "&{}", self.parts.query)?;
+            }
+        } else if !self.parts.query.is_empty() {
+            write!(f, "?{}", self.parts.query)?;
+        }
+
+        Ok(())
+    }
+}
+
+pub struct Fmt<F>(pub F)
+where
+    F: Fn(&mut fmt::Formatter) -> fmt::Result;
+
+impl<F> fmt::Debug for Fmt<F>
+where
+    F: Fn(&mut fmt::Formatter) -> fmt::Result,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        (self.0)(f)
+    }
 }
