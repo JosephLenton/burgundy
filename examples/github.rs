@@ -1,4 +1,3 @@
-//!
 //! This is an incomplete example of bilding a Github bindings using
 //! Burgundy.
 //!
@@ -18,7 +17,9 @@ impl Github {
             &format!("github burgundy example / {}", env!("CARGO_PKG_VERSION")),
         );
 
-        Self { domain }
+        Self {
+            domain,
+        }
     }
 
     pub fn get(&self) -> GithubGet {
@@ -33,7 +34,10 @@ pub struct GithubGet {
 }
 
 impl GithubGet {
-    pub fn orgs(self, org: &str) -> GithubGetOrgs {
+    pub fn orgs(
+        self,
+        org: &str,
+    ) -> GithubGetOrgs {
         GithubGetOrgs {
             url: self.url.push(&"orgs").push(&org),
         }

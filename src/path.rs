@@ -35,19 +35,30 @@ impl Path {
         }
     }
 
-    pub fn push(mut self, next: &impl fmt::Display) -> Self {
+    pub fn push(
+        mut self,
+        next: &impl fmt::Display,
+    ) -> Self {
         self.info.push_path_part(next);
 
         self
     }
 
-    pub fn query_param(mut self, key: &str, value: &impl fmt::Display) -> Self {
+    pub fn query(
+        mut self,
+        key: &str,
+        value: &impl fmt::Display,
+    ) -> Self {
         self.info.add_query_param(key, value);
 
         self
     }
 
-    pub fn header(&mut self, key: &'static str, value: &impl fmt::Display) {
+    pub fn header(
+        &mut self,
+        key: &'static str,
+        value: &impl fmt::Display,
+    ) {
         self.info.add_header(key, value);
     }
 
@@ -61,15 +72,19 @@ impl Path {
         string_or_error(self.execute(None))
     }
 
-    fn execute(self, body: Option<String>) -> Result<response::Response, error::Error> {
-        self.client
-            .borrow_mut()
-            .request(self.method, &self.domain_info.borrow(), &self.info, body)
+    fn execute(
+        self,
+        body: Option<String>,
+    ) -> Result<response::Response, error::Error> {
+        self.client.borrow_mut().request(self.method, &self.domain_info.borrow(), &self.info, body)
     }
 }
 
 impl<'a> fmt::Display for Path {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter,
+    ) -> fmt::Result {
         request_information::write_full_url(f, &self.domain_info.borrow(), &self.info)
     }
 }
@@ -98,16 +113,9 @@ mod test {
     #[test]
     fn push_works() {
         let domain = Domain::new(&"https://api.example.com");
-        let path = domain
-            .get()
-            .push(&"org")
-            .push(&"Microsoft")
-            .push(&"projects");
+        let path = domain.get().push(&"org").push(&"Microsoft").push(&"projects");
 
-        assert_eq!(
-            path.to_string(),
-            "https://api.example.com/org/Microsoft/projects"
-        );
+        assert_eq!(path.to_string(), "https://api.example.com/org/Microsoft/projects");
     }
 
     #[test]
@@ -121,15 +129,8 @@ mod test {
     #[test]
     fn query_parameters() {
         let domain = Domain::new("https://api.example.com");
-        let path = domain
-            .get()
-            .push(&"list")
-            .query_param(&"size", &50)
-            .query_param(&"index", &2);
+        let path = domain.get().push(&"list").query_param(&"size", &50).query_param(&"index", &2);
 
-        assert_eq!(
-            path.to_string(),
-            "https://api.example.com/list?size=50&index=2"
-        );
+        assert_eq!(path.to_string(), "https://api.example.com/list?size=50&index=2");
     }
 }

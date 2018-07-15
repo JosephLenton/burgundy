@@ -25,7 +25,9 @@ impl NativeClient {
         let https = hyper_tls::HttpsConnector::new(4).unwrap();
         let client = hyper::client::Client::builder().build::<_, hyper::Body>(https);
 
-        Self { client }
+        Self {
+            client,
+        }
     }
 
     crate fn request(
@@ -57,7 +59,10 @@ impl NativeClient {
                 let status = res.status().as_u16().into();
                 let body = response_to_string(res);
 
-                response::Response { body, status }
+                response::Response {
+                    body,
+                    status,
+                }
             })
             .map_err(|err| error::Error::from(err));
 

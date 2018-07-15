@@ -12,7 +12,9 @@ crate struct QueryBuilder {
 impl QueryBuilder {
     /// Trivial constructor.
     crate fn new() -> Self {
-        QueryBuilder { contents: None }
+        QueryBuilder {
+            contents: None,
+        }
     }
 
     /// True if this is empty.
@@ -25,7 +27,11 @@ impl QueryBuilder {
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
-    crate fn add(&mut self, key: &str, value: &impl fmt::Display) -> Result<(), error::Error> {
+    crate fn add(
+        &mut self,
+        key: &str,
+        value: &impl fmt::Display,
+    ) -> Result<(), error::Error> {
         if let None = self.contents {
             let query = String::with_capacity(QUERY_STRING_START_SIZE);
             self.contents = Some(query);
@@ -44,7 +50,10 @@ impl QueryBuilder {
 }
 
 impl fmt::Display for QueryBuilder {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter,
+    ) -> fmt::Result {
         if let Some(ref contents) = self.contents {
             write!(f, "{}", contents)
         } else {

@@ -27,7 +27,10 @@ impl RequestInformation {
         }
     }
 
-    crate fn push_path_part(&mut self, part: &impl fmt::Display) -> Result<(), error::Error> {
+    crate fn push_path_part(
+        &mut self,
+        part: &impl fmt::Display,
+    ) -> Result<(), error::Error> {
         write!(self.url, "/{}", part)?;
 
         Ok(())
@@ -43,11 +46,18 @@ impl RequestInformation {
         Ok(())
     }
 
-    crate fn add_header(&mut self, key: &'static str, value: &impl fmt::Display) {
+    crate fn add_header(
+        &mut self,
+        key: &'static str,
+        value: &impl fmt::Display,
+    ) {
         self.headers.add(key, value);
     }
 
-    crate fn for_each_header(&self, f: impl FnMut((&str, &str))) {
+    crate fn for_each_header(
+        &self,
+        f: impl FnMut((&str, &str)),
+    ) {
         self.headers.for_each(f)
     }
 }
@@ -57,7 +67,14 @@ crate fn to_full_url(
     parts: &RequestInformation,
 ) -> Result<String, fmt::Error> {
     let mut text = String::new();
-    write!(&mut text, "{}", UrlFormatter { domain, parts })?;
+    write!(
+        &mut text,
+        "{}",
+        UrlFormatter {
+            domain,
+            parts
+        }
+    )?;
     Ok(text)
 }
 
@@ -87,13 +104,11 @@ struct UrlFormatter<'a> {
 }
 
 impl<'a> fmt::Display for UrlFormatter<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}{}",
-            self.domain.url.trim_right_matches(&"/"),
-            self.parts.url
-        )?;
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter,
+    ) -> fmt::Result {
+        write!(f, "{}{}", self.domain.url.trim_right_matches(&"/"), self.parts.url)?;
 
         if !self.domain.query.is_empty() {
             write!(f, "?{}", self.domain.query)?;
@@ -117,7 +132,10 @@ impl<F> fmt::Debug for Fmt<F>
 where
     F: Fn(&mut fmt::Formatter) -> fmt::Result,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter,
+    ) -> fmt::Result {
         (self.0)(f)
     }
 }

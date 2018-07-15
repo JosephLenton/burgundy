@@ -17,15 +17,17 @@ impl Domain {
     pub fn new(domain: &str) -> Self {
         let domain = domain.to_string();
         let client = rc::Rc::new(cell::RefCell::new(native_client::NativeClient::new()));
-        let info = rc::Rc::new(cell::RefCell::new(
-            request_information::RequestInformation::new(domain),
-        ));
+        let info =
+            rc::Rc::new(cell::RefCell::new(request_information::RequestInformation::new(domain)));
 
-        Domain { client, info }
+        Domain {
+            client,
+            info,
+        }
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
-    pub fn query_param(
+    pub fn query(
         &mut self,
         key: &str,
         value: &impl fmt::Display,
@@ -35,7 +37,11 @@ impl Domain {
         Ok(())
     }
 
-    pub fn header(&mut self, key: &'static str, value: &impl fmt::Display) {
+    pub fn header(
+        &mut self,
+        key: &'static str,
+        value: &impl fmt::Display,
+    ) {
         self.info.borrow_mut().add_header(key, value);
     }
 
@@ -59,12 +65,11 @@ impl Domain {
         self.new_path(method::Method::Patch)
     }
 
-    fn new_path(&self, method: method::Method) -> Path {
-        Path::new(
-            method,
-            rc::Rc::clone(&self.client),
-            rc::Rc::clone(&self.info),
-        )
+    fn new_path(
+        &self,
+        method: method::Method,
+    ) -> Path {
+        Path::new(method, rc::Rc::clone(&self.client), rc::Rc::clone(&self.info))
     }
 }
 
@@ -90,10 +95,7 @@ mod test {
         domain.query_param(&"type", &"donkeys");
 
         let path = domain.get().push(&"list");
-        assert_eq!(
-            path.to_string(),
-            "https://api.example.com/list?type=donkeys"
-        );
+        assert_eq!(path.to_string(), "https://api.example.com/list?type=donkeys");
     }
 
     #[test]
@@ -102,9 +104,6 @@ mod test {
         domain.query_param(&"type", &"donkeys");
 
         let path = domain.get().push(&"list").query_param(&"length", &"long");
-        assert_eq!(
-            path.to_string(),
-            "https://api.example.com/list?type=donkeys&length=long"
-        );
+        assert_eq!(path.to_string(), "https://api.example.com/list?type=donkeys&length=long");
     }
 }

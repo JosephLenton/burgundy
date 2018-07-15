@@ -6,7 +6,7 @@ use std::error;
 use std::fmt;
 use std::result;
 
-pub type Result<T> = result::Result<T, error::Error>;
+pub type Result<T> = result::Result<T, self::Error>;
 
 /// Represents the errors possible to fall out from Burgundy.
 #[derive(Fail, Debug)]
@@ -44,12 +44,18 @@ pub enum Error {
 
     /// For HTTP requests which do not return 200.
     #[fail(display = "Http request was not ok, status {}", status)]
-    RequestNotOk { status: u32, body: String },
+    RequestNotOk {
+        status: u32,
+        body: String,
+    },
 }
 
 impl Error {
     /// Creates a new deserialization error.
-    crate fn new_deserialization_error(error: serde_json::error::Error, text: String) -> Self {
+    crate fn new_deserialization_error(
+        error: serde_json::error::Error,
+        text: String,
+    ) -> Self {
         Error::DeserializationError {
             error: error,
             text: text,
@@ -66,19 +72,25 @@ impl Error {
 
 impl From<fmt::Error> for Error {
     fn from(err: fmt::Error) -> Self {
-        Error::FormatError { error: err }
+        Error::FormatError {
+            error: err,
+        }
     }
 }
 
 impl From<http::Error> for Error {
     fn from(err: http::Error) -> Self {
-        Error::HttpError { error: err }
+        Error::HttpError {
+            error: err,
+        }
     }
 }
 
 impl From<hyper::Error> for Error {
     fn from(err: hyper::Error) -> Self {
-        Error::NetworkError { error: err }
+        Error::NetworkError {
+            error: err,
+        }
     }
 }
 
@@ -89,10 +101,14 @@ impl From<hyper::Error> for Error {
 #[derive(Debug)]
 pub(crate) struct UnreachableError;
 
-impl error::Error for UnreachableError {}
+impl error::Error for UnreachableError {
+}
 
 impl fmt::Display for UnreachableError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter,
+    ) -> fmt::Result {
         write!(f, "This error should never be reached. If you can see it, then please report it as a bug.")
     }
 }
