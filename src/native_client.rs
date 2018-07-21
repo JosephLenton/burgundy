@@ -2,14 +2,13 @@ mod string_stream;
 
 use error;
 use extern::futures::stream::Stream;
+use extern::futures::Future;
 use extern::hyper;
-use extern::hyper::rt::Future;
 use extern::hyper_tls;
 use extern::tokio;
 use method;
 use request_information;
 use response;
-use std::str;
 
 /// This is a wrapper around Hyper. It has two aims.
 ///
@@ -36,7 +35,7 @@ impl NativeClient {
         domain_info: &request_information::RequestInformation,
         path_info: &request_information::RequestInformation,
         content: Option<String>,
-    ) -> Result<response::Response, error::Error> {
+    ) -> Result<impl Future<Item=response::Response, Error=error::Error>, error::Error> {
         let hyper_method = method_to_hyper(method);
         let url = request_information::to_full_url(domain_info, path_info)?;
         let body = content_to_body(content);
@@ -66,6 +65,17 @@ impl NativeClient {
             })
             .map_err(|err| error::Error::from(err));
 
+        Ok(future)
+    }
+
+    crate fn request_blocking(
+        &mut self,
+        method: method::Method,
+        domain_info: &request_information::RequestInformation,
+        path_info: &request_information::RequestInformation,
+        content: Option<String>,
+    ) -> Result<response::Response, error::Error> {
+        let future = self.request(method, domain_info, path_info, content)?;
         tokio::runtime::Runtime::new().unwrap().block_on(future)
     }
 }
