@@ -1,0 +1,17 @@
+[package]
+name = "burgundy_derive"
+version = "0.1.0"
+authors = ["joseph.lenton@askattest.com <joseph.lenton@askattest.com>"]
+description = "The derive macro for burgundy"
+repository = "https://github.com/JosephLenton/burgundy"
+license = "MIT"
+
+[dependencies]
+burgundy_lib = { path = "./../burgundy_lib" }
+syn = "0.14.4"
+quote = "0.6.3"
+proc-macro2 = "0.4.8"
+synstructure = "0.9.0"
+
+[lib]
+proc-macro = true
