@@ -92,7 +92,7 @@ mod test {
     #[test]
     fn domain_with_base_query() {
         let mut domain = Domain::new("https://api.example.com/");
-        domain.query_param(&"type", &"donkeys");
+        domain.query(&"type", &"donkeys");
 
         let path = domain.get().push(&"list");
         assert_eq!(path.to_string(), "https://api.example.com/list?type=donkeys");
@@ -101,9 +101,9 @@ mod test {
     #[test]
     fn domain_with_base_query_and_path() {
         let mut domain = Domain::new("https://api.example.com/");
-        domain.query_param(&"type", &"donkeys");
+        domain.query(&"type", &"donkeys");
 
-        let path = domain.get().push(&"list").query_param(&"length", &"long");
+        let path = domain.get().push(&"list").query(&"length", &"long");
         assert_eq!(path.to_string(), "https://api.example.com/list?type=donkeys&length=long");
     }
 }

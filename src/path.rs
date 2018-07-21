@@ -129,7 +129,7 @@ mod test {
     #[test]
     fn query_parameters() {
         let domain = Domain::new("https://api.example.com");
-        let path = domain.get().push(&"list").query_param(&"size", &50).query_param(&"index", &2);
+        let path = domain.get().push(&"list").query(&"size", &50).query(&"index", &2);
 
         assert_eq!(path.to_string(), "https://api.example.com/list?size=50&index=2");
     }
