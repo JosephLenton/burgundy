@@ -44,6 +44,15 @@ impl Path {
         self
     }
 
+    pub fn push_partial(
+        mut self,
+        next: &impl fmt::Display,
+    ) -> Self {
+        self.info.push_path_part_partial(next);
+
+        self
+    }
+
     pub fn query(
         mut self,
         key: &str,

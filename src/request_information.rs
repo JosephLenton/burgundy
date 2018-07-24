@@ -36,6 +36,15 @@ impl RequestInformation {
         Ok(())
     }
 
+    crate fn push_path_part_partial(
+        &mut self,
+        part: &impl fmt::Display,
+    ) -> Result<(), error::Error> {
+        write!(self.url, "{}", part)?;
+
+        Ok(())
+    }
+
     crate fn add_query_param(
         &mut self,
         key: &str,
