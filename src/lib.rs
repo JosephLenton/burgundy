@@ -5,6 +5,7 @@
 #![feature(try_trait)]
 #![feature(box_patterns)]
 #![feature(extern_in_paths)]
+#![feature(use_extern_macros)]
 #![feature(non_modrs_mods)]
 #![feature(pattern)]
 #![feature(iterator_find_map)]

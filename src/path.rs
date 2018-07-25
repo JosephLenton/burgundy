@@ -85,7 +85,12 @@ impl Path {
         self,
         body: Option<String>,
     ) -> Result<response::Response, error::Error> {
-        self.client.borrow_mut().request_blocking(self.method, &self.domain_info.borrow(), &self.info, body)
+        self.client.borrow_mut().request_blocking(
+            self.method,
+            &self.domain_info.borrow(),
+            &self.info,
+            body,
+        )
     }
 }
 
