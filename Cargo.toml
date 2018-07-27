@@ -1,6 +1,6 @@
 [package]
 name = "burgundy"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["joseph.lenton@askattest.com <joseph.lenton@askattest.com>"]
 description = "Library for building API service bindings"
 repository = "https://github.com/JosephLenton/burgundy"
@@ -9,7 +9,7 @@ license = "MIT"
 [dependencies]
 futures = { version = "0.1.23", default-features = false }
 http = "0.1.7"
-hyper = "0.12.6"
+hyper = { version = "0.12.7", default-features = false }
 hyper-tls = "0.3.0"
 tokio = "0.1.7"
 failure = "0.1.1"

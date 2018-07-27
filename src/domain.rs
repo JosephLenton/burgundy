@@ -7,7 +7,7 @@ use std::cell;
 use std::fmt;
 use std::rc;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Domain {
     client: rc::Rc<cell::RefCell<native_client::NativeClient>>,
     info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,

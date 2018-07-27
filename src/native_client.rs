@@ -15,20 +15,25 @@ use response;
 ///
 ///  * Bunch up common code in one place.
 ///  * Keep bridge code to Hyper (or whatever) isolated in one place.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 crate struct NativeClient {
     client: hyper::client::Client<hyper_tls::HttpsConnector<hyper::client::HttpConnector>>,
+    tokio_runtime: tokio::runtime::Runtime,
 }
 
 impl NativeClient {
     crate fn new() -> Self {
         info!("new native client");
+        let tokio_runtime = tokio::runtime::Runtime::new().unwrap();
+        let tokio_executor = tokio_runtime.executor();
         let https = hyper_tls::HttpsConnector::new(4).unwrap();
-        let client = hyper::client::Client::builder().build::<_, hyper::Body>(https);
+        let client = hyper::client::Client::builder().executor(tokio_executor).build::<_, hyper::Body>(https);
+
         info!("done making new native client");
 
         Self {
             client,
+            tokio_runtime,
         }
     }
 
@@ -94,7 +99,7 @@ impl NativeClient {
         let future = self.request(method, domain_info, path_info, content)?;
 
         info!("call blocking request");
-        let response = tokio::runtime::Runtime::new().unwrap().block_on(future);
+        let response = self.tokio_runtime.block_on(future);
 
         info!("done making blocking request");
         response
