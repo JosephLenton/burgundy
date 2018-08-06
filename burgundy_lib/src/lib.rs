@@ -13,6 +13,12 @@
 #[macro_use]
 extern crate failure;
 
+#[macro_use]
+extern crate custom_derive;
+
+#[macro_use]
+extern crate enum_derive;
+
 mod native_client;
 mod request_information;
 

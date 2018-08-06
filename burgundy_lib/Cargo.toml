@@ -8,6 +8,8 @@ license = "MIT"
 publish = true
 
 [dependencies]
+custom_derive = "0.1.7"
+enum_derive = "0.1.7"
 futures = { version = "0.1.23", default-features = false }
 http = "0.1.7"
 hyper = "0.12.6"
