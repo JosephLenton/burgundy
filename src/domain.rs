@@ -46,26 +46,26 @@ impl Domain {
     }
 
     pub fn get(&self) -> Path {
-        self.new_path(method::Method::Get)
+        self.method(method::Method::Get)
     }
 
     pub fn post(&self) -> Path {
-        self.new_path(method::Method::Post)
+        self.method(method::Method::Post)
     }
 
     pub fn put(&self) -> Path {
-        self.new_path(method::Method::Put)
+        self.method(method::Method::Put)
     }
 
     pub fn delete(&self) -> Path {
-        self.new_path(method::Method::Delete)
+        self.method(method::Method::Delete)
     }
 
     pub fn patch(&self) -> Path {
-        self.new_path(method::Method::Patch)
+        self.method(method::Method::Patch)
     }
 
-    fn new_path(
+    pub fn method(
         &self,
         method: method::Method,
     ) -> Path {

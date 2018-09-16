@@ -27,7 +27,9 @@ impl NativeClient {
         let tokio_runtime = tokio::runtime::Runtime::new().unwrap();
         let tokio_executor = tokio_runtime.executor();
         let https = hyper_tls::HttpsConnector::new(4).unwrap();
-        let client = hyper::client::Client::builder().executor(tokio_executor).build::<_, hyper::Body>(https);
+        let client = hyper::client::Client::builder()
+            .executor(tokio_executor)
+            .build::<_, hyper::Body>(https);
 
         info!("done making new native client");
 
@@ -81,8 +83,7 @@ impl NativeClient {
                     body,
                     status,
                 }
-            })
-            .map_err(|err| error::Error::from(err));
+            }).map_err(|err| error::Error::from(err));
 
         info!("done making request");
         Ok(future)
@@ -113,8 +114,7 @@ fn response_to_string(response: hyper::Response<hyper::body::Body>) -> String {
         .fold(vec![], |mut acc, chunk| {
             acc.extend_from_slice(&chunk);
             Ok(acc)
-        })
-        .and_then(|v| String::from_utf8(v).map_err(|_| ()))
+        }).and_then(|v| String::from_utf8(v).map_err(|_| ()))
         .wait()
         .unwrap()
 }
