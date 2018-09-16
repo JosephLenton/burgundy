@@ -65,6 +65,22 @@ impl Domain {
         self.method(method::Method::Patch)
     }
 
+    pub fn head(&self) -> Path {
+        self.method(method::Method::Head)
+    }
+
+    pub fn options(&self) -> Path {
+        self.method(method::Method::Options)
+    }
+
+    pub fn connect(&self) -> Path {
+        self.method(method::Method::Connect)
+    }
+
+    pub fn trace(&self) -> Path {
+        self.method(method::Method::Trace)
+    }
+
     pub fn method(
         &self,
         method: method::Method,
