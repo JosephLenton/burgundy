@@ -1,6 +1,7 @@
 use extern::http;
 use extern::hyper;
 use extern::serde_json;
+use extern::serde_urlencoded;
 use response;
 use std::error;
 use std::fmt;
@@ -18,14 +19,28 @@ pub enum Error {
         error: fmt::Error,
     },
 
-    #[fail(display = "Failed to deserialize")]
+    #[fail(display = "Failed to deserialize response")]
     DeserializationError {
         /// The underlying error.
         #[cause]
-        error: serde_json::error::Error,
+        error: serde_json::Error,
 
         /// The text that was send to Serde. Useful for debugging.
         text: String,
+    },
+
+    #[fail(display = "Error serializing the blob into a query {}", error)]
+    SerializeQueryError {
+        /// The underlying error.
+        #[cause]
+        error: serde_urlencoded::ser::Error,
+    },
+
+    #[fail(display = "Failed to serialize the body for sending {}", error)]
+    SerializeBodyError {
+        /// The underlying error.
+        #[cause]
+        error: serde_json::Error,
     },
 
     #[fail(display = "Http error {}", error)]
@@ -53,12 +68,12 @@ pub enum Error {
 impl Error {
     /// Creates a new deserialization error.
     crate fn new_deserialization_error(
-        error: serde_json::error::Error,
+        error: serde_json::Error,
         text: String,
     ) -> Self {
         Error::DeserializationError {
-            error: error,
-            text: text,
+            error,
+            text,
         }
     }
 
@@ -68,28 +83,40 @@ impl Error {
             body: response.body,
         }
     }
+
+    crate fn new_serialize_query_error(error: serde_urlencoded::ser::Error) -> Self {
+        Error::SerializeQueryError {
+            error,
+        }
+    }
+
+    crate fn new_serialize_body_error(error: serde_json::Error) -> Self {
+        Error::SerializeBodyError {
+            error,
+        }
+    }
 }
 
 impl From<fmt::Error> for Error {
-    fn from(err: fmt::Error) -> Self {
+    fn from(error: fmt::Error) -> Self {
         Error::FormatError {
-            error: err,
+            error,
         }
     }
 }
 
 impl From<http::Error> for Error {
-    fn from(err: http::Error) -> Self {
+    fn from(error: http::Error) -> Self {
         Error::HttpError {
-            error: err,
+            error,
         }
     }
 }
 
 impl From<hyper::Error> for Error {
-    fn from(err: hyper::Error) -> Self {
+    fn from(error: hyper::Error) -> Self {
         Error::NetworkError {
-            error: err,
+            error,
         }
     }
 }

@@ -1,4 +1,6 @@
 use error;
+use extern::serde;
+use extern::serde_urlencoded;
 use std::fmt;
 use std::fmt::Write;
 
@@ -25,6 +27,22 @@ impl QueryBuilder {
             true
         }
     }
+    crate fn add_blob<B: serde::ser::Serialize + ?Sized>(
+        &mut self,
+        blob: &B,
+    ) -> Result<(), error::Error> {
+        let query_str = self.get_query_string_buffer();
+
+        if query_str.len() > 0 {
+            write!(query_str, "&")?;
+        }
+
+        let blob_str =
+            serde_urlencoded::to_string(&blob).map_err(error::Error::new_serialize_query_error)?;
+        write!(query_str, "{}", &blob_str)?;
+
+        Ok(())
+    }
 
     /// Pushes the key/value combination onto the path as a query parameter.
     crate fn add(
@@ -32,12 +50,7 @@ impl QueryBuilder {
         key: &str,
         value: &impl fmt::Display,
     ) -> Result<(), error::Error> {
-        if let None = self.contents {
-            let query = String::with_capacity(QUERY_STRING_START_SIZE);
-            self.contents = Some(query);
-        }
-
-        let query_str = self.contents.as_mut().unwrap();
+        let query_str = self.get_query_string_buffer();
 
         if query_str.len() > 0 {
             write!(query_str, "&")?;
@@ -46,6 +59,15 @@ impl QueryBuilder {
         write!(query_str, "{}={}", &key, &value)?;
 
         Ok(())
+    }
+
+    fn get_query_string_buffer(&mut self) -> &mut String {
+        if let None = self.contents {
+            let query = String::with_capacity(QUERY_STRING_START_SIZE);
+            self.contents = Some(query);
+        }
+
+        self.contents.as_mut().unwrap()
     }
 }
 
@@ -89,5 +111,46 @@ mod test {
         query.add(&"num_cats", &123);
 
         assert_eq!(query.to_string(), "key=value&donkeyfy=true&num_cats=123");
+    }
+
+    #[test]
+    fn query_with_blob() {
+        #[derive(Serialize)]
+        struct Blob {
+            pages: u32,
+            name: &'static str,
+        }
+
+        let mut query = QueryBuilder::new();
+        let blob = Blob {
+            pages: 123,
+            name: "abc_999_xyz",
+        };
+
+        query.add_blob(&blob);
+
+        assert_eq!(query.to_string(), "pages=123&name=abc_999_xyz");
+    }
+
+    #[test]
+    fn query_with_blob_and_parts() {
+        #[derive(Serialize)]
+        struct Blob {
+            pages: u32,
+            name: &'static str,
+        }
+
+        let mut query = QueryBuilder::new();
+
+        let blob = Blob {
+            pages: 123,
+            name: "abc_999_xyz",
+        };
+
+        query.add(&"donkeyfy", &true);
+        query.add_blob(&blob);
+        query.add(&"num_cats", &123);
+
+        assert_eq!(query.to_string(), "donkeyfy=true&pages=123&name=abc_999_xyz&num_cats=123");
     }
 }

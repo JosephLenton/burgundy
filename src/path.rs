@@ -72,24 +72,49 @@ impl Path {
     }
 
     /// Executes the path, and deserializes what comes back.
-    pub fn execute_as_json<T: serde::de::DeserializeOwned>(self) -> Result<T, error::Error> {
-        deserialize::<T>(self.execute_as_string()?)
+    pub fn execute_as_json<B: serde::ser::Serialize + ?Sized, R: serde::de::DeserializeOwned>(
+        self,
+        body: Option<&B>,
+    ) -> Result<R, error::Error> {
+        deserialize::<R>(self.execute_as_string(body)?)
     }
 
     /// Sends the request, returns the response as just a String.
-    pub fn execute_as_string(self) -> Result<String, error::Error> {
-        string_or_error(self.execute(None))
+    pub fn execute_as_string<B: serde::ser::Serialize + ?Sized>(
+        self,
+        body: Option<&B>,
+    ) -> Result<String, error::Error> {
+        string_or_error(self.execute(body))
     }
 
-    fn execute(
-        self,
-        body: Option<String>,
+    fn execute<B: serde::ser::Serialize + ?Sized>(
+        mut self,
+        maybe_body: Option<&B>,
     ) -> Result<response::Response, error::Error> {
+        let mut body_str = None;
+
+        match maybe_body {
+            Some(body) => {
+                match self.method {
+                    method::Method::Get => {
+                        self.info.add_query_blob(body)?;
+                    },
+                    _ => {
+                        body_str = Some(
+                            serde_json::to_string(body)
+                                .map_err(error::Error::new_serialize_body_error)?,
+                        );
+                    },
+                }
+            },
+            _ => {},
+        }
+
         self.client.borrow_mut().request_blocking(
             self.method,
             &self.domain_info.borrow(),
             &self.info,
-            body,
+            body_str,
         )
     }
 }

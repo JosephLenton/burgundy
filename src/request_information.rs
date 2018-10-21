@@ -1,4 +1,5 @@
 use error;
+use extern::serde;
 use std::fmt;
 use std::fmt::Write;
 
@@ -50,9 +51,14 @@ impl RequestInformation {
         key: &str,
         value: &impl fmt::Display,
     ) -> Result<(), error::Error> {
-        self.query.add(key, value)?;
+        self.query.add(key, value)
+    }
 
-        Ok(())
+    crate fn add_query_blob<B: serde::ser::Serialize + ?Sized>(
+        &mut self,
+        blob: &B,
+    ) -> Result<(), error::Error> {
+        self.query.add_blob(blob)
     }
 
     crate fn add_header(
