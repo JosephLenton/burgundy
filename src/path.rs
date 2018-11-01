@@ -1,10 +1,10 @@
-use error;
-use extern::serde;
-use extern::serde_json;
-use method;
-use native_client;
-use request_information;
-use response;
+use crate::error;
+use crate::method;
+use crate::native_client;
+use crate::request_information;
+use crate::response;
+use serde;
+use serde_json;
 use std::cell;
 use std::fmt;
 use std::rc;
@@ -20,7 +20,7 @@ pub struct Path {
 }
 
 impl Path {
-    crate fn new(
+    pub(crate) fn new(
         method: method::Method,
         client: rc::Rc<cell::RefCell<native_client::NativeClient>>,
         domain_info: rc::Rc<cell::RefCell<request_information::RequestInformation>>,

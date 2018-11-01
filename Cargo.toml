@@ -1,6 +1,6 @@
 [package]
 name = "burgundy"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["joseph.lenton@askattest.com <joseph.lenton@askattest.com>"]
 description = "Library for building API service bindings"
 repository = "https://github.com/JosephLenton/burgundy"
@@ -16,7 +16,6 @@ failure = "0.1.1"
 serde = "1.0.70"
 serde_json = "1.0.24"
 log = "0.4.3"
-env_logger = "0.5.11"
 serde_urlencoded = "0.5.3"
 
 [dev-dependencies]

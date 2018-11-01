@@ -1,19 +1,19 @@
 use std::fmt;
 
 #[derive(Debug, Clone)]
-crate struct Headers {
+pub(crate) struct Headers {
     headers: Option<Vec<(String, String)>>,
 }
 
 impl Headers {
-    crate fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             headers: None,
         }
     }
 
     /// Stores the header.
-    crate fn add(
+    pub(crate) fn add(
         &mut self,
         key: &str,
         value: &impl fmt::Display,
@@ -26,7 +26,7 @@ impl Headers {
     }
 
     /// An iterator over all header key => value pairs.
-    crate fn for_each(
+    pub(crate) fn for_each(
         &self,
         mut f: impl FnMut((&str, &str)),
     ) {

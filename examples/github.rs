@@ -1,8 +1,7 @@
 //! This is an incomplete example of bilding a Github bindings using
 //! Burgundy.
 
-#![feature(extern_in_paths)]
-use extern::burgundy;
+extern crate burgundy;
 
 pub struct Github {
     domain: burgundy::Domain,

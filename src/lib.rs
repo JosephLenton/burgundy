@@ -1,15 +1,18 @@
 #![allow(missing_docs)]
 #![warn(unreachable_pub)]
 #![deny(trivial_casts, trivial_numeric_casts, unused_extern_crates, unused_import_braces)]
-#![feature(nll)]
-#![feature(try_trait)]
-#![feature(box_patterns)]
-#![feature(extern_in_paths)]
-#![feature(pattern)]
-#![feature(crate_visibility_modifier)]
 
 #[macro_use]
 extern crate failure;
+extern crate futures;
+extern crate http;
+extern crate hyper;
+extern crate hyper_tls;
+extern crate log;
+extern crate serde;
+extern crate serde_json;
+extern crate serde_urlencoded;
+extern crate tokio;
 
 mod native_client;
 mod request_information;

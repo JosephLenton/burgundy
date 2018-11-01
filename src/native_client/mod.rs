@@ -1,28 +1,28 @@
 mod string_stream;
 
-use error;
-use extern::futures::stream::Stream;
-use extern::futures::Future;
-use extern::hyper;
-use extern::hyper_tls;
-use extern::log::info;
-use extern::tokio;
-use method;
-use request_information;
-use response;
+use crate::error;
+use crate::method;
+use crate::request_information;
+use crate::response;
+use futures::stream::Stream;
+use futures::Future;
+use hyper;
+use hyper_tls;
+use log::info;
+use tokio;
 
 /// This is a wrapper around Hyper. It has two aims.
 ///
 ///  * Bunch up common code in one place.
 ///  * Keep bridge code to Hyper (or whatever) isolated in one place.
 #[derive(Debug)]
-crate struct NativeClient {
+pub(crate) struct NativeClient {
     client: hyper::client::Client<hyper_tls::HttpsConnector<hyper::client::HttpConnector>>,
     tokio_runtime: tokio::runtime::Runtime,
 }
 
 impl NativeClient {
-    crate fn new() -> Self {
+    pub(crate) fn new() -> Self {
         info!("new native client");
         let tokio_runtime = tokio::runtime::Runtime::new().unwrap();
         let tokio_executor = tokio_runtime.executor();
@@ -39,7 +39,7 @@ impl NativeClient {
         }
     }
 
-    crate fn request_blocking(
+    pub(crate) fn request_blocking(
         &mut self,
         method: method::Method,
         domain_info: &request_information::RequestInformation,
@@ -56,7 +56,7 @@ impl NativeClient {
         response
     }
 
-    crate fn request(
+    pub(crate) fn request(
         &mut self,
         method: method::Method,
         domain_info: &request_information::RequestInformation,
@@ -120,7 +120,7 @@ fn response_to_string(response: hyper::Response<hyper::body::Body>) -> String {
         .unwrap()
 }
 
-crate fn content_to_body(maybe_content: Option<String>) -> hyper::Body {
+pub(crate) fn content_to_body(maybe_content: Option<String>) -> hyper::Body {
     if let Some(content) = maybe_content {
         let stream = string_stream::StringStream::new(content);
         hyper::Body::wrap_stream(stream)

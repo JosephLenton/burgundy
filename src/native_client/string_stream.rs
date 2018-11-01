@@ -1,19 +1,19 @@
-use error;
-use extern::futures;
-use extern::hyper;
+use crate::error;
+use futures;
+use hyper;
 
 /// This is a fake future stream.
 /// It wraps the `String` given, and when it is polled it just gets
 /// returned.
 ///
 /// Second, third, and other future polls, all return `Option::None`.
-crate struct StringStream {
+pub(crate) struct StringStream {
     content: Option<String>,
 }
 
 impl StringStream {
     /// Takes ownership of the `String`, turning it into a future stream.
-    crate fn new(content: String) -> Self {
+    pub(crate) fn new(content: String) -> Self {
         Self {
             content: Some(content),
         }

@@ -1,33 +1,33 @@
-use error;
-use extern::serde;
-use extern::serde_urlencoded;
+use crate::error;
+use serde;
+use serde_urlencoded;
 use std::fmt;
 use std::fmt::Write;
 
 const QUERY_STRING_START_SIZE: usize = 20;
 
 #[derive(Debug, Clone)]
-crate struct QueryBuilder {
+pub(crate) struct QueryBuilder {
     contents: Option<String>,
 }
 
 impl QueryBuilder {
     /// Trivial constructor.
-    crate fn new() -> Self {
+    pub(crate) fn new() -> Self {
         QueryBuilder {
             contents: None,
         }
     }
 
     /// True if this is empty.
-    crate fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         if let Some(ref query) = self.contents {
             query.len() == 0
         } else {
             true
         }
     }
-    crate fn add_blob<B: serde::ser::Serialize + ?Sized>(
+    pub(crate) fn add_blob<B: serde::ser::Serialize + ?Sized>(
         &mut self,
         blob: &B,
     ) -> Result<(), error::Error> {
@@ -45,7 +45,7 @@ impl QueryBuilder {
     }
 
     /// Pushes the key/value combination onto the path as a query parameter.
-    crate fn add(
+    pub(crate) fn add(
         &mut self,
         key: &str,
         value: &impl fmt::Display,

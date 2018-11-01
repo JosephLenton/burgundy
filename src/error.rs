@@ -1,8 +1,8 @@
-use extern::http;
-use extern::hyper;
-use extern::serde_json;
-use extern::serde_urlencoded;
+use http;
+use hyper;
 use response;
+use serde_json;
+use serde_urlencoded;
 use std::error;
 use std::fmt;
 use std::result;
@@ -67,7 +67,7 @@ pub enum Error {
 
 impl Error {
     /// Creates a new deserialization error.
-    crate fn new_deserialization_error(
+    pub(crate) fn new_deserialization_error(
         error: serde_json::Error,
         text: String,
     ) -> Self {
@@ -77,20 +77,20 @@ impl Error {
         }
     }
 
-    crate fn new_request_not_ok(response: response::Response) -> Self {
+    pub(crate) fn new_request_not_ok(response: response::Response) -> Self {
         Error::RequestNotOk {
             status: response.status,
             body: response.body,
         }
     }
 
-    crate fn new_serialize_query_error(error: serde_urlencoded::ser::Error) -> Self {
+    pub(crate) fn new_serialize_query_error(error: serde_urlencoded::ser::Error) -> Self {
         Error::SerializeQueryError {
             error,
         }
     }
 
-    crate fn new_serialize_body_error(error: serde_json::Error) -> Self {
+    pub(crate) fn new_serialize_body_error(error: serde_json::Error) -> Self {
         Error::SerializeBodyError {
             error,
         }
