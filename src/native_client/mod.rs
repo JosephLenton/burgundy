@@ -23,7 +23,7 @@ pub(crate) struct NativeClient {
 
 impl NativeClient {
     pub(crate) fn new() -> Self {
-        info!("new native client");
+        println!("new native client");
         let tokio_runtime = tokio::runtime::Runtime::new().unwrap();
         let tokio_executor = tokio_runtime.executor();
         let https = hyper_tls::HttpsConnector::new(4).unwrap();
@@ -31,7 +31,7 @@ impl NativeClient {
             .executor(tokio_executor)
             .build::<_, hyper::Body>(https);
 
-        info!("done making new native client");
+        println!("done making new native client");
 
         Self {
             client,
@@ -46,13 +46,13 @@ impl NativeClient {
         path_info: &request_information::RequestInformation,
         content: Option<String>,
     ) -> Result<response::Response, error::Error> {
-        info!("making blocking request");
+        println!("making blocking request");
         let future = self.request(method, domain_info, path_info, content)?;
 
-        info!("call blocking request");
+        println!("call blocking request");
         let response = self.tokio_runtime.block_on(future);
 
-        info!("done making blocking request");
+        println!("done making blocking request");
         response
     }
 
@@ -63,37 +63,37 @@ impl NativeClient {
         path_info: &request_information::RequestInformation,
         body_str: Option<String>,
     ) -> Result<impl Future<Item = response::Response, Error = error::Error>, error::Error> {
-        info!("make request");
+        println!("make request");
         let hyper_method = method_to_hyper(method);
         let url = request_information::to_full_url(domain_info, path_info)?;
         let mut request_builder = hyper::Request::builder();
 
-        info!("making request to {}", url);
+        println!("making request to {}", url);
         request_builder.method(hyper_method).uri(&url);
 
-        info!("set headers");
+        println!("set headers");
         domain_info.for_each_header(|(key, value)| {
-            info!("set domain header '{}' to '{}'", key, value);
+            println!("set domain header '{}' to '{}'", key, value);
             request_builder.header(key, value);
         });
         path_info.for_each_header(|(key, value)| {
-            info!("set path header '{}' to '{}'", key, value);
+            println!("set path header '{}' to '{}'", key, value);
             request_builder.header(key, value);
         });
 
-        info!("turn request into body");
+        println!("turn request into body");
         let body = content_to_body(body_str);
         let request = request_builder.body(body)?;
 
-        info!("make request future");
+        println!("make request future");
         let future = self
             .client
             .request(request)
             .map(|res| {
-                info!("transform request to response object");
+                println!("transform request to response object");
                 let status = res.status().as_u16().into();
                 let body = response_to_string(res);
-                info!("transform request to response object, has status {}", status);
+                println!("transform request to response object, has status {}", status);
 
                 response::Response {
                     body,
@@ -102,22 +102,32 @@ impl NativeClient {
             })
             .map_err(|err| error::Error::from(err));
 
-        info!("done making request");
+        println!("done making request");
         Ok(future)
     }
 }
 
 fn response_to_string(response: hyper::Response<hyper::body::Body>) -> String {
-    response
+    println!(">>>> response_to_string");
+    let r = response
         .into_body()
         .map_err(|_| ())
         .fold(vec![], |mut acc, chunk| {
+            println!(">>>> chunking");
             acc.extend_from_slice(&chunk);
+            println!("<<<< chunking");
             Ok(acc)
         })
-        .and_then(|v| String::from_utf8(v).map_err(|_| ()))
+        .and_then(|v| {
+            println!(">>>> chunk to string");
+            let r = String::from_utf8(v).map_err(|_| ());
+            println!("<<<< chunk to string");
+            r
+        })
         .wait()
-        .unwrap()
+        .unwrap();
+    println!("<<<< response_to_string");
+    r
 }
 
 pub(crate) fn content_to_body(maybe_content: Option<String>) -> hyper::Body {
