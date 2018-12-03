@@ -89,35 +89,24 @@ impl NativeClient {
         let future = self
             .client
             .request(request)
-            .map(|res| {
-                info!("transform request to response object");
+            .and_then(|res| {
                 let status = res.status().as_u16().into();
-                let body = response_to_string(res);
-                info!("transform request to response object, has status {}", status);
+                info!("transform request to response object, with status {}", status);
 
-                response::Response {
-                    body,
-                    status,
-                }
+                res.into_body().concat2().map(move |body_chunk| {
+                    let body = String::from_utf8(body_chunk.to_vec()).unwrap();
+
+                    response::Response {
+                        body,
+                        status,
+                    }
+                })
             })
-            .map_err(|err| error::Error::from(err));
+            .map_err(error::Error::from);
 
         info!("done making request");
         Ok(future)
     }
-}
-
-fn response_to_string(response: hyper::Response<hyper::body::Body>) -> String {
-    response
-        .into_body()
-        .map_err(|_| ())
-        .fold(vec![], |mut acc, chunk| {
-            acc.extend_from_slice(&chunk);
-            Ok(acc)
-        })
-        .and_then(|v| String::from_utf8(v).map_err(|_| ()))
-        .wait()
-        .unwrap()
 }
 
 pub(crate) fn content_to_body(maybe_content: Option<String>) -> hyper::Body {
